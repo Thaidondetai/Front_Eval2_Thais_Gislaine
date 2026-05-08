@@ -1,0 +1,29 @@
+
+#Se define el nombre del pipeline (Se vera en github actions)
+name: Pipeline
+
+#se define el trigger, es decir "cuando ocurra algo"
+on:
+  push:
+  #Solo se ejecuta si se hace push a deploy
+    branches:
+      - deploy
+
+#Define los trabajos del pipeline
+jobs:
+#para definir nombre del job
+  build:
+#github crea una maquina ubuntu temporal para ejecutar los pasos
+    runs-on: ubuntu-latest
+
+#Lista de los pasos
+    steps:
+      - name: Clonar repo
+
+      #Usa una accion del marketplace es decir descarga/clona el repo automaticamente
+        uses: actions/checkout@v4
+
+      - name: Mostrar mensaje
+
+      #Ejecuta comando linux, solo imprime mensaje
+        run: echo "Pipeline ejecutandose correctamente"
