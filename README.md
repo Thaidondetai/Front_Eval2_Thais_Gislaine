@@ -64,7 +64,7 @@ frontend/
 ├── app.py                 # Aplicación principal Flask
 ├── requirements.txt       # Dependencias Python
 ├── .env.example          # Ejemplo de variables de entorno
-├── .env                  # Variables de entorno (crear manualmente)
+├── .env                  # Variables de entorno
 ├── templates/            # Plantillas HTML
 │   ├── base.html         # Plantilla base
 │   ├── index.html        # Página principal
@@ -129,3 +129,57 @@ response = requests.post(f'{BACKEND_URL}/api/usuarios', json=datos_usuario)
 - Asegúrate de que las URLs en las variables de entorno sean correctas
 - En producción, establece `DEBUG=False` y usa una `SECRET_KEY` segura
 - La aplicación está diseñada para funcionar con el backend API de este proyecto
+
+## Contenerización con Docker
+- El Frontend esta preparado para ejecutarse dentro de un contenedor Docker
+
+**Construccion de la imagen** : comando para ejecutar la construccion de la imagen
+ |docker build -t frontend|
+**Ejecución del contenedor** : comando para ejecutar el contenedor
+ |docker run -d -p 5000:5000 \-e BACKEND_URL=http://IP_PRIVADA_BACKEND:3000 \frontend|
+
+## Orquestación con Docker Compose
+En entornos de desarrollo se utiliza Docker Compose para levantar todos los servicios como :
+- Frontend (Flask)
+- Backend (Node.js)
+- Base de datos MySQL
+
+Se utiliza el comando : |docker-compose up|
+
+Se comunican en este entorno mediante los nombres de los contenedores.
+
+## CI/CD con GitHub Actions
+
+- El proyecto se le implemento un pipeline de integración y despliegue continuo.
+- El pipeline se ejecuta automaticamente al hacer push en la rama **deploy**
+
+**Etapas del pipeline**
+1. Construccion de la imagen Docker del frontend
+2. Publicación de la imagen en Docker Hub
+3. Despliegue automático en la instancia EC2
+
+**Despliegue del pipeline**
+El pipeline se conecta mediante SSH a la instancia EC2 pública y ejecuta lo siguiente :
+1. Descarga de la nueva imagen
+2. Eliminación del contenedor anterior
+3. Ejecución del nuevo contenedor con variables de entorno
+
+## Despliegue en AWS EC2
+
+El Frontend se despliega en una instancia EC2 ubicada en una subred pública.
+
+- Se puede acceder desde internet mediante la Ip pública de la instancia.
+- El frontend esta ejecutado dentro de un contenedor Docker.
+- Conectado al backend mediante la IP privada dentro de la VPC
+
+## Comunicación con Backend en Producción
+- La comunicación en el entorno de producción hay que tener en cuenta que el Frontend se ejecuta en una subred pública y el Backend se ejecuta en una subred privada,al igual que el Data que se encuentra en esta misma.
+- La comunicacion se realiza mediante la IP privada del backend de la siguiente forma :
+|BACKEND_URL=http://IP_PRIVADA_BACKEND:3000|
+
+
+
+
+
+
+

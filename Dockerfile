@@ -1,38 +1,44 @@
-#Imagen
+#Imagen base de Python 3.11 slim
 FROM python:3.11-slim AS builder
 
-#Establecer el directorio de trabajo
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-#Variables para optimizar la ejecución de Python en Docker
+# Evita los archivos .pyc y mejora logs en Docker
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-#Instalar las dependencias necesarias para compilar las dependencias de Python
+# Copia el archivo de dependencias
 COPY requirements.txt .
+
+# Instala dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
 
+#Imagen final para ejecutar la aplicación
 FROM python:3.11-slim
 
-#Crear un usuario no root para ejecutar la aplicación de forma segura
+# Creacion del usuario no root
 RUN useradd -m appuser
 
+# Directorio de trabajo
 WORKDIR /app
 
-#Copiar dependencias desde builder
-COPY --from=builder /app /app
+# Copia SOLO las dependencias instaladas desde la etapa builder para evitar copiar archivos innecesarios y reducir el tamaño de la imagen
 
-#Copia el resto de los archivos del poyecto
+COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copiar el código de la aplicación
 COPY . .
 
-#Darle permisos al usuario creada para acceder a los archivos de la aplicación
+# Dar permisos al usuario sobre los archivos
 RUN chown -R appuser:appuser /app
 
-#Cambiar al usuario no root para ejecutar la aplicación de forma segura
+# Cambiar a usuario no root
 USER appuser
 
-#Exponer el puerto en el que la aplicación se ejecutará
+# Exponer el puerto donde corre Flask
 EXPOSE 5000
 
-#Iniciar Flask al ejecutar el contenedor
-CMD [ "python", "app.py" ]
+# Comando para iniciar la aplicación
+CMD ["python", "app.py"]

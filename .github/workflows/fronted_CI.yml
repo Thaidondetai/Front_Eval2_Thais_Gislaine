@@ -3,11 +3,10 @@ name: Frontend CI/CD
 on:
   push:
     branches:
-      - main
       - deploy
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,3 +21,18 @@ jobs:
 
       - name: Push image
         run: docker push thaisca1/front_evaluacion_2:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST}}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull thaisca1/front_evaluacion_2:latest
+            docker stop frontend || true
+            docker rm frontend || true
+            docker run -d -p 5000:5000 \
+              --name frontend \
+              -e BACKEND_URL=http://10.0.142.98:3000 \
+              thaisca1/front_evaluacion_2:latest
