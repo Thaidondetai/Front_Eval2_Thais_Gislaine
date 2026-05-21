@@ -29,10 +29,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull thaisca1/front_evaluacion_2:latest
-            docker stop frontend || true
-            docker rm frontend || true
-            docker run -d -p 5000:5000 \
-              --name frontend \
+            sudo docker pull thaisca1/front_evaluacion_2:latest
+            sudo docker stop frontend_app || true
+            sudo docker rm frontend_app || true
+            sudo docker run -d -p 5000:5000 \
+              --name frontend_app \
               -e BACKEND_URL=http://10.0.142.98:3000 \
               thaisca1/front_evaluacion_2:latest
